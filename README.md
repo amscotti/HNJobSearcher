@@ -2,6 +2,8 @@
 
 This Python CLI application allows you to search for job postings on Hacker News based on a given query text. It retrieves job postings using the [Hacker News API](https://github.com/HackerNews/API), indexes them using the [Whoosh search engine](https://whoosh.readthedocs.io/en/latest/), and displays the search results with the help of the [Rich library](https://github.com/willmcgugan/rich).
 
+![Screenshot](screenshot.png)
+
 ## Installation
 
 1. Clone the repository.
