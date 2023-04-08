@@ -29,7 +29,7 @@ class JobPostingIndex:
         if not self.does_index_exist():
             os.makedirs(self.index_dir)
 
-    def search(self, query_text: str, search_count: int) -> list:
+    def search(self, query_text: str, search_count: int) -> list[dict[str, str]]:
         ix = index.open_dir(self.index_dir)
         parser = QueryParser("text", schema=ix.schema)
 
@@ -37,7 +37,8 @@ class JobPostingIndex:
             query = parser.parse(query_text)
             results = searcher.search(query, limit=search_count)
 
-            results_list = [{"id": result['id'], "text": result["text"]}
-                            for result in results]
+            results_list: list[dict[str, str]] = [
+                {"id": result['id'], "text": result["text"]}
+                for result in results]
 
         return results_list

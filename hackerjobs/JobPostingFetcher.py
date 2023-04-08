@@ -25,7 +25,7 @@ class JobPostingFetcher:
             response.raise_for_status()
             return await response.json()
 
-    async def __process_item(self, item_id: int) -> dict | None:
+    async def __process_item(self, item_id: int) -> dict[str, str] | None:
         job = await self.__fetch(item_id)
         if 'text' in job:
             text = BeautifulSoup(job["text"], "html.parser").get_text()

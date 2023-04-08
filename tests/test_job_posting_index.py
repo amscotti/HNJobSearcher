@@ -1,4 +1,5 @@
 from tempfile import TemporaryDirectory
+
 from hackerjobs.JobPostingIndex import JobPostingIndex
 
 
