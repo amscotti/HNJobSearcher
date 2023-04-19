@@ -1,0 +1,10 @@
+.git/
+.github/
+.idea/
+.vscode/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+tests/
+*.png
+hackernews_job_postings_*

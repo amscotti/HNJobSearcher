@@ -1,44 +1,71 @@
-import os
+import sqlite3
+from sqlite3 import Connection
+from typing import TypeAlias
 
-from whoosh import index
-from whoosh.analysis import StemmingAnalyzer, KeywordAnalyzer
-from whoosh.fields import Schema, ID, KEYWORD, TEXT
-from whoosh.qparser import QueryParser
+from hackerjobs.Posting import Posting
+
+ResultList: TypeAlias = list[Posting]
 
 
 class JobPostingIndex:
-    SCHEMA = Schema(id=ID(stored=True, unique=True),
-                    text=TEXT(analyzer=StemmingAnalyzer(), stored=True),
-                    by=KEYWORD(analyzer=KeywordAnalyzer(), stored=True))
+    def __init__(self, index_file: str):
+        self.index_file = index_file
+        self.conn: Connection | None = None
 
-    def __init__(self, index_dir):
-        self.index_dir = index_dir
+    def connect(self):
+        self.conn = sqlite3.connect(self.index_file)
+        return self
 
-    def index_postings(self, postings) -> None:
-        ix = index.create_in(self.index_dir, self.SCHEMA)
+    def close(self):
+        if self.conn:
+            self.conn.close()
+            self.conn = None
 
-        with ix.writer() as writer:
-            for job in postings:
-                if job:
-                    writer.add_document(**job)
+    def __enter__(self):
+        return self.connect()
 
-    def does_index_exist(self) -> bool:
-        return os.path.exists(self.index_dir)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
-    def create_index(self) -> None:
-        if not self.does_index_exist():
-            os.makedirs(self.index_dir)
+    def table_exists(self) -> bool:
+        assert self.conn is not None
+        cursor = self.conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='documents'"
+        )
+        result = cursor.fetchone()
+        return result is not None
 
-    def search(self, query_text: str, search_count: int) -> list[dict[str, str]]:
-        ix = index.open_dir(self.index_dir)
-        parser = QueryParser("text", schema=ix.schema)
+    def initialize(self) -> None:
+        assert self.conn is not None
+        self.conn.execute(
+            "CREATE VIRTUAL TABLE IF NOT EXISTS documents USING fts5(id, text, by)"
+        )
 
-        with ix.searcher() as searcher:
-            query = parser.parse(query_text)
-            results = searcher.search(query, limit=search_count)
+    def drop_table(self) -> None:
+        assert self.conn is not None
+        self.conn.execute("DROP TABLE IF EXISTS documents")
+        self.conn.commit()
 
-            results_list: list[dict[str, str]] = [
-                {"id": result['id'], "text": result["text"]}
-                for result in results]
+    def index_postings(self, postings: list[Posting]) -> None:
+        assert self.conn is not None
 
-        return results_list
+        valid_postings = [job for job in postings if job]
+
+        self.conn.executemany(
+            "INSERT INTO documents (id, text, by) VALUES (?, ?, ?)",
+            ((job["id"], job["text"], job["by"]) for job in valid_postings)
+        )
+
+        self.conn.commit()
+
+    def search(self, query_text: str, search_count: int) -> ResultList:
+        assert self.conn is not None
+        cursor = self.conn.execute(
+            "SELECT id, text, by FROM documents WHERE text MATCH ? LIMIT ?",
+            (query_text, search_count)
+        )
+        results = cursor.fetchall()
+
+        return [
+            {"id": result[0], "text": result[1], "by": result[2]} for result in results
+        ]

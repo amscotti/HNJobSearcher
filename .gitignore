@@ -134,3 +134,4 @@ dmypy.json
 .vscode/
 hackernews_job_postings_*
 .DS_Store
+.ruff_cache/
