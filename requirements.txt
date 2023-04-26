@@ -1,8 +1,6 @@
 aiohttp==3.8.4
-beautifulsoup4==4.12.1
-Whoosh==2.7.4
-rich==13.3.3
-flake8==6.0.0
-autopep8==2.0.2
+beautifulsoup4==4.12.2
+rich==13.3.4
+ruff==0.0.263
 mypy==1.2.0
-pytest==7.2.2
+pytest==7.3.1

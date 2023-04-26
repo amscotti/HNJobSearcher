@@ -1,6 +1,6 @@
 # Hacker News Job Posting Search
 
-This Python CLI application allows you to search for job postings on Hacker News based on a given query text. It retrieves job postings using the [Hacker News API](https://github.com/HackerNews/API), indexes them using the [Whoosh search engine](https://whoosh.readthedocs.io/en/latest/), and displays the search results with the help of the [Rich library](https://github.com/willmcgugan/rich).
+This Python CLI application allows you to search for job postings on Hacker News based on a given query text. It retrieves job postings using the [Hacker News API](https://github.com/HackerNews/API), indexes them using an SQLite full-text search (FTS) engine, and displays the search results with the help of the [Rich library](https://github.com/willmcgugan/rich).
 
 ![Screenshot](screenshot.png)
 
@@ -16,8 +16,8 @@ cd HNJobSearcher
 2. (Optional) Set up a virtual environment.
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 3. Install the required dependencies.

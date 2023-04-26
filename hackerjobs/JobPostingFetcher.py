@@ -3,6 +3,8 @@ import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
 
+from hackerjobs.Posting import Posting
+
 
 class JobPostingFetcher:
     URL = "https://hacker-news.firebaseio.com/v0/item/"
@@ -14,7 +16,7 @@ class JobPostingFetcher:
     async def close(self) -> None:
         await self.session.close()
 
-    async def get_posting(self) -> list:
+    async def get_posting(self) -> list[Posting]:
         posting = await self.__fetch(self.posting_id)
         tasks = [self.__process_item(item) for item in posting["kids"]]
         return await asyncio.gather(*tasks)
@@ -25,9 +27,9 @@ class JobPostingFetcher:
             response.raise_for_status()
             return await response.json()
 
-    async def __process_item(self, item_id: int) -> dict[str, str] | None:
+    async def __process_item(self, item_id: int) -> Posting | None:
         job = await self.__fetch(item_id)
-        if 'text' in job:
-            text = BeautifulSoup(job["text"], "html.parser").get_text()
+        if "text" in job:
+            text = BeautifulSoup(job["text"], "html.parser").get_text(separator="\n")
             return {"id": str(item_id), "text": text, "by": job["by"]}
         return None

@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "HNJobSearcher"
+version = "0.1.0"
+description = "An application for looking at job postings from the Hacker News monthly job posting"
+authors = ["Anthony Scotti"]
+readme = "README.md"
+
+[tool.mypy]
+python_version = "3.10"
+strict_optional = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+files = "main.py,hackerjobs/**/*.py,tests/**/*.py"
+
+[tool.ruff]
+select = ["E", "F", "Q"]
