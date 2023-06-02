@@ -54,7 +54,7 @@ def parse_arguments():
     parser.add_argument("-r", "--reindex", action="store_true",
                         help="Drop the table and index jobs again")
     parser.add_argument("-j", "--job-posting-id", type=int,
-                        default=35773707, help="Job posting ID from HackerNews")
+                        default=36152014, help="Job posting ID from HackerNews")
     parser.add_argument("-q", "--query-text", default="python AND remote",
                         help="Text to search for in postings")
     parser.add_argument("-c", "--search-count", type=int,
