@@ -44,6 +44,37 @@ For example, to search for remote Python job postings, you can run:
 python main.py -j 35424807 -q "python AND remote" -c 100
 ```
 
+## Development
+
+### Running Tests
+
+Run all unit tests:
+```bash
+pytest
+```
+
+Run a specific test:
+```bash
+pytest tests/test_file.py::test_function_name
+```
+
+### Code Quality
+
+Lint the code:
+```bash
+ruff check .
+```
+
+Check types:
+```bash
+pyright
+```
+
+Format code:
+```bash
+ruff format .
+```
+
 ## Docker
 
 Build the Docker image:

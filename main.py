@@ -2,51 +2,54 @@ import argparse
 import asyncio
 
 from rich.console import Console
-from rich.table import Table
 
 from hackerjobs.JobPostingFetcher import JobPostingFetcher
 from hackerjobs.JobPostingIndex import JobPostingIndex
-from hackerjobs.Posting import Posting
+from hackerjobs.output import print_search_results, print_search_query_info
 
 URL = "https://news.ycombinator.com/item"
-
-
-def print_search_results(results: list[Posting]):
-    console = Console()
-    table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("Link", style="dim", width=46)
-    table.add_column("Posting Snippet", width=75)
-
-    for result in results:
-        table.add_row(f"{URL}?id={result['id']}",
-                      result["text"].replace("\n", " ").strip()[:75])
-
-    console.print(f"Found {len(results)} postings\n")
-    console.print(table)
+JOB_POSTING_ID = 45093192 # Monthly job posting thread
+DEFAULT_QUERY_TEXT = "python AND remote"
 
 
 async def main(reindex: bool,
-               job_posting_id: int,
-               query_text: str,
-               search_count: int) -> None:
+                job_posting_id: int,
+                query_text: str,
+                search_count: int,
+                days: int) -> None:
+    console = Console()
     index_dir = f"hackernews_job_postings_{job_posting_id}.db"
 
     with JobPostingIndex(index_dir) as index:
         if reindex:
+            msg = "[yellow]🔄 Reindexing job postings...[/yellow]"
+            console.print(msg)
+            console.print(msg)
             index.drop_table()
 
         if not index.table_exists():
-            print("Indexing job postings")
-            job_posting_fetcher = JobPostingFetcher(job_posting_id)
-            results = await job_posting_fetcher.get_posting()
-            await job_posting_fetcher.close()
-            index.initialize()
-            index.index_postings(results)
+            status_msg = "[bold green]🔄 Indexing job postings...[/bold green]"
+            with console.status(status_msg, spinner="dots"):
+                job_posting_fetcher = JobPostingFetcher(job_posting_id)
+                results = await job_posting_fetcher.get_posting()
+                await job_posting_fetcher.close()
+                index.initialize()
+                index.index_postings(results)
 
-            print("Done indexing")
+            success_msg = (
+                f"[green]✅ Successfully indexed {len(results)} job postings![/green]"
+            )
+            console.print(success_msg)
 
-        search_results = index.search(query_text, search_count)
-        print_search_results(search_results)
+        search_results = index.search(
+            query_text=query_text,
+            days=days,
+            limit=search_count,
+            sort_by_time=True
+        )
+
+        print_search_query_info(query_text, len(search_results), console)
+        print_search_results(search_results, console, show_age=True)
 
 
 def parse_arguments():
@@ -54,11 +57,14 @@ def parse_arguments():
     parser.add_argument("-r", "--reindex", action="store_true",
                         help="Drop the table and index jobs again")
     parser.add_argument("-j", "--job-posting-id", type=int,
-                        default=36152014, help="Job posting ID from HackerNews")
-    parser.add_argument("-q", "--query-text", default="python AND remote",
+                        default=JOB_POSTING_ID, help="Job posting ID from HackerNews")
+    parser.add_argument("-q", "--query-text", default=DEFAULT_QUERY_TEXT,
                         help="Text to search for in postings")
     parser.add_argument("-c", "--search-count", type=int,
                         default=100, help="Count of posting to be returned")
+    parser.add_argument("-d", "--days", type=int, default=30,
+                        help="Filter postings from last N days (default: 30)")
+
     return parser.parse_args()
 
 
@@ -67,4 +73,5 @@ if __name__ == "__main__":
     asyncio.run(main(args.reindex,
                      args.job_posting_id,
                      args.query_text,
-                     args.search_count))
+                     args.search_count,
+                     args.days))
