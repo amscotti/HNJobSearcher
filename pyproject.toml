@@ -1,18 +1,25 @@
-[tool.poetry]
+[project]
 name = "HNJobSearcher"
 version = "0.1.0"
 description = "An application for looking at job postings from the Hacker News monthly job posting"
-authors = ["Anthony Scotti"]
 readme = "README.md"
+requires-python = ">= 3.13"
+authors = [
+  {name = "Anthony Scotti"},
+]
+dependencies = [
+    "aiohttp>=3.12.15",
+    "beautifulsoup4>=4.13.5",
+    "rich>=14.1.0",
+    "pydantic>=2.0.0",
+]
 
-[tool.mypy]
-python_version = "3.10"
-strict_optional = true
-ignore_missing_imports = true
-warn_unused_ignores = true
-warn_redundant_casts = true
-warn_unused_configs = true
-files = "main.py,hackerjobs/**/*.py,tests/**/*.py"
+[dependency-groups]
+dev = [
+    "ruff>=0.0.263",
+    "pytest>=7.3.1",
+    "pyright>=1.1.0"
+]
 
 [tool.ruff]
 select = ["E", "F", "Q"]

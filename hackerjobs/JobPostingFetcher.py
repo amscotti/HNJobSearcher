@@ -19,7 +19,8 @@ class JobPostingFetcher:
     async def get_posting(self) -> list[Posting]:
         posting = await self.__fetch(self.posting_id)
         tasks = [self.__process_item(item) for item in posting["kids"]]
-        return await asyncio.gather(*tasks)
+        results = await asyncio.gather(*tasks)
+        return [result for result in results if result is not None]
 
     async def __fetch(self, item_id: int) -> dict:
         url = f"{self.URL}{item_id}.json"
@@ -29,7 +30,12 @@ class JobPostingFetcher:
 
     async def __process_item(self, item_id: int) -> Posting | None:
         job = await self.__fetch(item_id)
-        if "text" in job:
+        if "text" in job and "time" in job:
             text = BeautifulSoup(job["text"], "html.parser").get_text(separator="\n")
-            return {"id": str(item_id), "text": text, "by": job["by"]}
+            return Posting(
+                id=str(item_id),
+                text=text,
+                by=job.get("by", "unknown"),
+                timestamp=job["time"]
+            )
         return None
