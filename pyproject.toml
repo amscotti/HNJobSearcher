@@ -11,15 +11,16 @@ dependencies = [
     "aiohttp>=3.12.15",
     "beautifulsoup4>=4.13.5",
     "rich>=14.1.0",
-    "pydantic>=2.0.0",
+    "pydantic>=2.11.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.0.263",
-    "pytest>=7.3.1",
-    "pyright>=1.1.0"
+    "ruff>=0.13.2",
+    "pytest>=8.4.2",
+    "mypy>=1.18.2"
 ]
 
-[tool.ruff]
-select = ["E", "F", "Q"]
+[tool.mypy]
+strict = true
+mypy_path = "."

@@ -16,7 +16,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Lint with ruff
         run: uv run --frozen ruff check .
-      - name: Check types with pyright
-        run: uv run --frozen pyright
+      - name: Check types with mypy
+        run: uv run --frozen mypy .
       - name: Test with python ${{ matrix.python-version }}
         run: uv run --frozen pytest
