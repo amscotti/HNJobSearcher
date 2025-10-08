@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import Connection
-from typing import TypeAlias
+from typing import TypeAlias, Self
 from datetime import datetime, timedelta
 
 from hackerjobs.Posting import Posting
@@ -13,19 +13,21 @@ class JobPostingIndex:
         self.index_file = index_file
         self.conn: Connection | None = None
 
-    def connect(self):
+    def connect(self) -> Self:
         self.conn = sqlite3.connect(self.index_file)
         return self
 
-    def close(self):
+    def close(self) -> None:
         if self.conn:
             self.conn.close()
             self.conn = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self.connect()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self, exc_type: type | None, exc_val: Exception | None, exc_tb: object | None
+    ) -> None:
         self.close()
 
     def table_exists(self) -> bool:
@@ -92,9 +94,7 @@ class JobPostingIndex:
         self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_postings_timestamp ON postings(timestamp)"
         )
-        self.conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_postings_by ON postings(by)"
-        )
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_postings_by ON postings(by)")
         self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_postings_created_at ON postings(created_at)"
         )
@@ -146,7 +146,7 @@ class JobPostingIndex:
         query_text: str,
         days: int = 30,
         limit: int = 100,
-        sort_by_time: bool = True
+        sort_by_time: bool = True,
     ) -> ResultList:
         """Enhanced search with date filtering and time sorting"""
         assert self.conn is not None
@@ -170,10 +170,6 @@ class JobPostingIndex:
         results = cursor.fetchall()
 
         return [
-            Posting(
-                id=result[0],
-                text=result[1],
-                by=result[2],
-                timestamp=result[3]
-            ) for result in results
+            Posting(id=result[0], text=result[1], by=result[2], timestamp=result[3])
+            for result in results
         ]

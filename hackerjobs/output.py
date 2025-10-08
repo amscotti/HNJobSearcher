@@ -7,7 +7,9 @@ from hackerjobs.Posting import Posting
 URL = "https://news.ycombinator.com/item"
 
 
-def print_search_query_info(query_text: str, result_count: int, console: Console):
+def print_search_query_info(
+    query_text: str, result_count: int, console: Console
+) -> None:
     """Print formatted search query information using Rich styling."""
     panel_content = (
         f'[bold white]Query:[/bold white] [yellow]"{query_text}"[/yellow]\n'
@@ -18,7 +20,7 @@ def print_search_query_info(query_text: str, result_count: int, console: Console
         panel_content,
         title="[bold blue]🔍 Search Results[/bold blue]",
         border_style="blue",
-        padding=(1, 2)
+        padding=(1, 2),
     )
     console.print(query_panel)
     console.print()
@@ -26,7 +28,7 @@ def print_search_query_info(query_text: str, result_count: int, console: Console
 
 def print_search_results(
     results: list[Posting], console: Console, show_age: bool = True
-):
+) -> None:
     """Print formatted search results using Rich styling."""
     if not results:
         console.print("[dim]No results found for your search query.[/dim]")
