@@ -3,19 +3,31 @@ import asyncio
 
 from rich.console import Console
 
+from hackerjobs.HNSearch import get_latest_hiring_post_id
 from hackerjobs.JobPostingFetcher import JobPostingFetcher
 from hackerjobs.JobPostingIndex import JobPostingIndex
 from hackerjobs.output import print_search_results, print_search_query_info
 
 URL = "https://news.ycombinator.com/item"
-JOB_POSTING_ID = 45438503  # Monthly job posting thread
 DEFAULT_QUERY_TEXT = "python AND remote"
 
 
 async def main(
-    reindex: bool, job_posting_id: int, query_text: str, search_count: int, days: int
+    reindex: bool,
+    job_posting_id: int | None,
+    query_text: str,
+    search_count: int,
+    days: int,
 ) -> None:
     console = Console()
+
+    if job_posting_id is None:
+        with console.status(
+            "[bold blue]Searching for latest job posting...[/bold blue]", spinner="dots"
+        ):
+            job_posting_id = await get_latest_hiring_post_id()
+        console.print(f"[blue]Using latest job posting: {job_posting_id}[/blue]")
+
     index_dir = f"hackernews_job_postings_{job_posting_id}.db"
 
     with JobPostingIndex(index_dir) as index:
@@ -59,8 +71,8 @@ def parse_arguments() -> argparse.Namespace:
         "-j",
         "--job-posting-id",
         type=int,
-        default=JOB_POSTING_ID,
-        help="Job posting ID from HackerNews",
+        default=None,
+        help="Job posting ID from HackerNews (auto-detects latest if not provided)",
     )
     parser.add_argument(
         "-q",
